@@ -5,16 +5,57 @@ let score = 0;
 const scoreText = document.getElementById("score");
 
 const player = {
-  x: 50,
+  x: 40,
   y: canvas.height / 2,
-  width: 40,
+  width: 50,
   height: 20,
-  speed: 5
+  speed: 5,
+  recoil: 0
 };
 
-function drawPlayer() {
-  ctx.fillStyle = "lime";
-  ctx.fillRect(player.x, player.y, player.width, player.height);
+function drawGun() {
+  // recoil animation
+  if (player.recoil > 0) player.recoil -= 1;
+
+  // Gun body
+  ctx.fillStyle = "#444";
+  ctx.fillRect(
+    player.x - player.recoil,
+    player.y,
+    player.width,
+    player.height
+  );
+
+  // Gun barrel
+  ctx.fillStyle = "#222";
+  ctx.fillRect(
+    player.x + player.width - player.recoil,
+    player.y + 6,
+    20,
+    6
+  );
+
+  // Gun handle
+  ctx.fillStyle = "#333";
+  ctx.fillRect(
+    player.x + 10,
+    player.y + player.height,
+    8,
+    15
+  );
+}
+
+function drawMuzzleFlash() {
+  ctx.beginPath();
+  ctx.arc(
+    player.x + player.width + 18,
+    player.y + 10,
+    6,
+    0,
+    Math.PI * 2
+  );
+  ctx.fillStyle = "orange";
+  ctx.fill();
 }
 
 document.addEventListener("keydown", (e) => {
@@ -30,18 +71,20 @@ let bullets = [];
 document.addEventListener("keydown", (e) => {
   if (e.key === " ") {
     bullets.push({
-      x: player.x + player.width,
+      x: player.x + player.width + 20,
       y: player.y + player.height / 2,
-      speed: 7
+      speed: 8
     });
+    player.recoil = 5;
+    drawMuzzleFlash();
   }
 });
 
 function drawBullets() {
   bullets.forEach((b, i) => {
     b.x += b.speed;
-    ctx.fillStyle = "yellow";
-    ctx.fillRect(b.x, b.y, 10, 4);
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(b.x, b.y, 14, 3);
 
     if (b.x > canvas.width) bullets.splice(i, 1);
   });
@@ -139,7 +182,7 @@ function detectCollision() {
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawPlayer();
+  drawGun();
   drawBullets();
   drawEnemies();
   detectCollision();
